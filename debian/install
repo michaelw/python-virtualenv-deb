@@ -1,0 +1,2 @@
+scripts/virtualenv /usr/bin/
+virtualenv_support/*.whl /usr/share/python-virtualenv/

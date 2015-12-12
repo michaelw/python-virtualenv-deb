@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+PIP_WHL=$(CURDIR)/virtualenv_support/pip-1.5.4-py2.py3-none-any.whl
+PIP_WHL_PATCHED=$(CURDIR)/virtualenv_support/pip-1.5debian1-py2.py3-none-any.whl
+
+%:
+	dh $@ --with python2
+
+override_dh_auto_configure:
+	# Patch the bundled pip
+	[ -e $(PIP_WHL).orig ] || mv $(PIP_WHL) $(PIP_WHL).orig
+	mkdir -p debian/pip
+	unzip -d debian/pip $(PIP_WHL).orig
+	# Add any necessary embedded pip patch applications here, e.g.
+	#patch -d debian/pip -p1 < debian/patches/pip_non-writeable-home.patch
+	patch -d debian/pip -p1 < debian/patches/tls-verification.diff
+	cd debian/pip && zip -r $(PIP_WHL_PATCHED) .
+	# Rebuild the embedded parts, we may be quilt patching their sources
+	[ -e virtualenv.py.orig ] || cp virtualenv.py virtualenv.py.orig
+	python bin/rebuild-script.py
+	dh_auto_configure
+
+override_dh_auto_clean:
+	[ ! -e virtualenv.py.orig ] || mv virtualenv.py.orig virtualenv.py
+	rm -rf debian/pip $(PIP_WHL_PATCHED)
+	[ ! -e $(PIP_WHL).orig ] || mv $(PIP_WHL).orig $(PIP_WHL)
+	dh_auto_clean
+
+override_dh_installchangelogs:
+	dh_installchangelogs docs/news.rst

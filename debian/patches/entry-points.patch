@@ -1,0 +1,15 @@
+Description: Prevent installation of virtualenv-X.Y since we're not
+ providing these for every supported version.
+Author: Barry Warsaw <barry@python.org>
+Forwarded: no
+
+--- a/setup.py
++++ b/setup.py
+@@ -9,7 +9,6 @@
+         'entry_points': {
+             'console_scripts': [
+                 'virtualenv=virtualenv:main',
+-                'virtualenv-%s.%s=virtualenv:main' % sys.version_info[:2]
+             ],
+         },
+         'zip_safe': False,
